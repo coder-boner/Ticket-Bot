@@ -29,6 +29,7 @@ CHAT_LOGS_PATH = "chat_logs/"  # Directory to store chat logs - DO NOT CHANGE
 DEL_CATEGORY_ID = CHANNEL_ID  # ID of the category
 AUTHORIZED_USER_ID = USER_ID  # ID of the authorized user
 
+
 # Ensure chat logs directory exists
 os.makedirs(CHAT_LOGS_PATH, exist_ok=True)
 
@@ -56,6 +57,27 @@ TICKET_NUMBER = load_ticket_number()
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}!")
+
+    # Count active tickets
+    ticket_category = bot.get_channel(TICKET_CATEGORY_ID)
+    if ticket_category:
+        active_tickets = len([channel for channel in ticket_category.channels if channel.name.startswith(ticket_status_colors['unclaimed']) or channel.name.startswith(ticket_status_colors['claimed'])])
+    else:
+        active_tickets = 0
+
+    # Count ticket logs
+    ticket_logs_path = CHAT_LOGS_PATH
+    if os.path.exists(ticket_logs_path):
+        ticket_logs = len([file for file in os.listdir(ticket_logs_path) if file.endswith('.txt')])
+    else:
+        ticket_logs = 0
+
+    # Update bot presence
+    total_tickets = active_tickets + ticket_logs
+    await bot.change_presence(activity=discord.Game(name=f"Managing {total_tickets} tickets"))
+
+    # Ensure this runs on every restart
+    bot.loop.create_task(on_ready())
 
 # Dropdown menu class
 class TicketTypeDropdown(discord.ui.Select):
