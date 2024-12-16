@@ -136,7 +136,6 @@ class TicketView(discord.ui.View):
         super().__init__(timeout=None) # Set timeout to None to disable it
         self.add_item(TicketTypeDropdown())
 
-
 # Custom check to ensure only the authorized user can use the command
 def is_authorized_user():
     def predicate(ctx):
