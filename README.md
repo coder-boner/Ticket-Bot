@@ -19,3 +19,5 @@ AUTHORIZED_USER_ID - Set this as your discord id as this is for perms to delete 
 -------------------
 
 The bot token that was pushed in a push is reset since py charm was retarded and did not push without the token even though in the python file it was set as TOKEN
+
+Github is making me wanna kms cause it dissapeared after I updated this README
