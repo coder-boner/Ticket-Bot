@@ -269,5 +269,6 @@ async def delete_category_channels(ctx):
 
     await ctx.send("All channels in the category have been deleted.")
 
+
 # Run the bot
 bot.run("TOKEN")
