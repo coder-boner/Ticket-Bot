@@ -20,15 +20,15 @@ intents.guild_messages = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Configuration
-TICKET_CATEGORY_ID = CHANNEL_ID  # Replace with the ID of the "Open Tickets" category
-ARCHIVE_CATEGORY_ID = CHANNEL_ID  # Replace with the ID of the "Archived Tickets" category
-SUPPORT_ROLE_ID = ROLE_ID  # Replace with the support role ID
-TICKET_NUMBER_FILE = "ticket_number.json"  # File to persist ticket number - DO NOT CHANGE
-CHAT_LOGS_PATH = "chat_logs/"  # Directory to store chat logs - DO NOT CHANGE
+TICKET_CATEGORY_ID = 1317242682883571742  # Replace with the ID of the "Open Tickets" category
+ARCHIVE_CATEGORY_ID = 1317496652260446239  # Replace with the ID of the "Archived Tickets" category
+SUPPORT_ROLE_ID = 1272059253581938780  # Replace with the support role ID
+TICKET_NUMBER_FILE = "ticket_number.json"  # File to persist ticket number
+CHAT_LOGS_PATH = "chat_logs/"  # Directory to store chat logs
 
 #DANGER THIS IS FOR THE MASS CHANNEL DELETE FOR CLOSED TICKETS
-DEL_CATEGORY_ID = CHANNEL_ID  # ID of the category
-AUTHORIZED_USER_ID = USER_ID  # ID of the authorized user
+DEL_CATEGORY_ID = 1317496652260446239  # ID of the category
+AUTHORIZED_USER_ID = 769912339255263233  # ID of the authorized user
 
 
 # Ensure chat logs directory exists
@@ -91,6 +91,10 @@ class TicketTypeDropdown(discord.ui.Select):
         super().__init__(placeholder="Choose a ticket type...", options=options)
 
     async def callback(self, interaction: discord.Interaction):
+        # Your existing code here
+        await interaction.response.defer() # Defer the interaction to avoid timeout
+
+    async def callback(self, interaction: discord.Interaction):
         global TICKET_NUMBER
 
         ticket_type = self.values[0]  # Get the selected ticket type
@@ -129,8 +133,9 @@ class TicketTypeDropdown(discord.ui.Select):
 # View class to hold the dropdown
 class TicketView(discord.ui.View):
     def __init__(self):
-        super().__init__()
+        super().__init__(timeout=None) # Set timeout to None to disable it
         self.add_item(TicketTypeDropdown())
+
 
 # Custom check to ensure only the authorized user can use the command
 def is_authorized_user():
@@ -143,7 +148,13 @@ def is_authorized_user():
 async def ticket(ctx):
     """Command to start the ticket creation process."""
     view = TicketView()
-    await ctx.send("Select a ticket type to create a new ticket:", view=view)
+    try:
+        await ctx.send("Select a ticket type to create a new ticket:", view=view)
+    except discord.Forbidden:
+        await ctx.send("I do not have permission to send messages in this channel.")
+    except discord.HTTPException as e:
+        await ctx.send(f"An error occurred: {e.text}")
+
 
 @bot.command()
 async def claim(ctx):
@@ -261,4 +272,4 @@ async def delete_category_channels(ctx):
     await ctx.send("All channels in the category have been deleted.")
 
 # Run the bot
-bot.run("TOKEN")
+bot.run("MTMxNzIzODkyMjcxNTIwMTU3Ng.Gq-Oos.5H4tP29WPgLKxMr29wTUYSXgPsBpbMZQuAFdks")
