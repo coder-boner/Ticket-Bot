@@ -155,7 +155,6 @@ async def ticket(ctx):
     except discord.HTTPException as e:
         await ctx.send(f"An error occurred: {e.text}")
 
-
 @bot.command()
 async def claim(ctx):
     """Command to claim a ticket."""
