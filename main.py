@@ -145,21 +145,21 @@ async def ticket(ctx):
     try:
         await ctx.send("Select a ticket type to create a new ticket:", view=view)
     except discord.Forbidden:
-        await ctx.send("I do not have permission to send messages in this channel.")
+        await ctx.send("I do not have permission to send messages in this channel.", ephemeral=True)
     except discord.HTTPException as e:
-        await ctx.send(f"An error occurred: {e.text}")
+        await ctx.send(f"An error occurred: {e.text}", ephemeral=True)
 
 @bot.command()
 async def claim(ctx):
     """Command to claim a ticket."""
     if ctx.channel.category_id != TICKET_CATEGORY_ID:
-        await ctx.send("This command can only be used in ticket channels.")
+        await ctx.send("This command can only be used in ticket channels.", ephemeral=True)
         return
 
     # Check if the user has the support role
     support_role = get(ctx.guild.roles, id=SUPPORT_ROLE_ID)
     if support_role not in ctx.author.roles:
-        await ctx.send("You don't have permission to claim this ticket.")
+        await ctx.send("You don't have permission to claim this ticket.", ephemeral=True)
         return
 
     # Change the ticket status to claimed
@@ -171,18 +171,18 @@ async def claim(ctx):
 async def close(ctx, *, reason: str = None):
     """Command to close a ticket."""
     if ctx.channel.category_id != TICKET_CATEGORY_ID:
-        await ctx.send("This command can only be used in ticket channels.")
+        await ctx.send("This command can only be used in ticket channels.", ephemeral=True)
         return
 
     # Check if the user has the support role
     support_role = get(ctx.guild.roles, id=SUPPORT_ROLE_ID)
     if support_role not in ctx.author.roles:
-        await ctx.send("You don't have permission to close this ticket.")
+        await ctx.send("You don't have permission to close this ticket.", ephemeral=True)
         return
 
     # Ensure the reason is not empty
     if reason is None or reason.strip() == "":
-        await ctx.send("Reason cannot be empty. Please provide a reason to close the ticket.")
+        await ctx.send("Reason cannot be empty. Please provide a reason to close the ticket.", ephemeral=True)
         return
 
     # Change the ticket status to closed
@@ -197,7 +197,7 @@ async def close(ctx, *, reason: str = None):
     # Archive the ticket
     archive_category = ctx.guild.get_channel(ARCHIVE_CATEGORY_ID)
     if not archive_category:
-        await ctx.send("Archive category not found!")
+        await ctx.send("Archive category not found!", ephemeral=True)
         return
     await ctx.channel.edit(category=archive_category)
 
@@ -240,7 +240,7 @@ async def close(ctx, *, reason: str = None):
 async def delete_category_channels(ctx):
     # Check if the command is used by the authorized user
     if ctx.author.id != AUTHORIZED_USER_ID:
-        await ctx.send("You do not have permission to use this command.")
+        await ctx.send("You do not have permission to use this command.", ephemeral=True)
         return
 
     # Specify the category ID
@@ -249,20 +249,20 @@ async def delete_category_channels(ctx):
     # Get the category
     category = ctx.guild.get_channel(category_id)
     if not category or not isinstance(category, discord.CategoryChannel):
-        await ctx.send("Category not found or is not a category channel.")
+        await ctx.send("Category not found or is not a category channel.", ephemeral=True)
         return
 
     # Delete all channels in the category
     for channel in category.channels:
         try:
             await channel.delete()
-            await ctx.send(f"Deleted channel: {channel.name}")
+            await ctx.send(f"Deleted channel: {channel.name}", ephemeral=True)
         except discord.Forbidden:
-            await ctx.send(f"Failed to delete channel: {channel.name} due to lack of permissions.")
+            await ctx.send(f"Failed to delete channel: {channel.name} due to lack of permissions.", ephemeral=True)
         except discord.HTTPException as e:
-            await ctx.send(f"Failed to delete channel: {channel.name} - {e.text}")
+            await ctx.send(f"Failed to delete channel: {channel.name} - {e.text}", ephemeral=True)
 
-    await ctx.send("All channels in the category have been deleted.")
+    await ctx.send("All channels in the category have been deleted.", ephemeral=True)
 
 
 # Run the bot
