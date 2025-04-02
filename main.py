@@ -17,7 +17,7 @@ intents.messages = True
 intents.guilds = True
 intents.message_content = True
 intents.guild_messages = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix="?", intents=intents)
 
 # Configuration
 TICKET_CATEGORY_ID = CATEGORY_ID  # Replace with the ID of the "Open Tickets" category
@@ -59,28 +59,22 @@ TICKET_NUMBER = load_ticket_number()
 async def on_ready():
     print(f"Logged in as {bot.user}!")
 
-    # Count active tickets
-    ticket_category = bot.get_channel(TICKET_CATEGORY_ID)
-    if ticket_category:
-        active_tickets = len([channel for channel in ticket_category.channels if channel.name.startswith(ticket_status_colors['unclaimed']) or channel.name.startswith(ticket_status_colors['claimed'])])
-    else:
-        active_tickets = 0
+    # Register persistent view
+    bot.add_view(TicketView())
 
-    # Count ticket logs
-    ticket_logs_path = CHAT_LOGS_PATH
-    if os.path.exists(ticket_logs_path):
-        ticket_logs = len([file for file in os.listdir(ticket_logs_path) if file.endswith('.txt')])
+    # Update bot presence with active tickets and logs count
+    ticket_category = bot.get_channel(TICKET_CATEGORY_ID)
+    active_tickets = len([channel for channel in ticket_category.channels if channel.name.startswith(ticket_status_colors['unclaimed']) or channel.name.startswith(ticket_status_colors['claimed'])]) if ticket_category else 0
+
+    if os.path.exists(CHAT_LOGS_PATH):
+        ticket_logs = len([file for file in os.listdir(CHAT_LOGS_PATH) if file.endswith('.txt')])
     else:
         ticket_logs = 0
 
-    # Update bot presence
     total_tickets = active_tickets + ticket_logs
     await bot.change_presence(activity=discord.Game(name=f"Managing {total_tickets} tickets"))
 
-    # Ensure this runs on every restart
-    bot.loop.create_task(on_ready())
-
-# Dropdown menu class
+# Dropdown menu class with persistent custom_id
 class TicketTypeDropdown(discord.ui.Select):
     def __init__(self):
         options = [
@@ -88,11 +82,7 @@ class TicketTypeDropdown(discord.ui.Select):
             discord.SelectOption(label="Discord", description="Support for Discord-related issues."),
             discord.SelectOption(label="Other", description="Support for other issues.")
         ]
-        super().__init__(placeholder="Choose a ticket type...", options=options)
-
-    async def callback(self, interaction: discord.Interaction):
-        # Your existing code here
-        await interaction.response.defer() # Defer the interaction to avoid timeout
+        super().__init__(placeholder="Choose a ticket type...", options=options, custom_id="ticket_type_dropdown")
 
     async def callback(self, interaction: discord.Interaction):
         global TICKET_NUMBER
@@ -118,7 +108,6 @@ class TicketTypeDropdown(discord.ui.Select):
         ticket_channel = await category.create_text_channel(name=ticket_name, overwrites=overwrites)
 
         # Send a message in the ticket channel
-        creation_time = datetime.now(timezone('UTC')).astimezone()
         message = f"{ticket_creator.mention} has made a ticket, {interaction.guild.get_role(SUPPORT_ROLE_ID).mention} will be with you soon. Please be patient."
         await ticket_channel.send(message)
 
@@ -129,6 +118,13 @@ class TicketTypeDropdown(discord.ui.Select):
             await interaction.response.send_message(f"Your ticket has been created: {ticket_channel.mention}. However, I couldn't send you a DM with the details.", ephemeral=True)
 
         await interaction.response.send_message(f"Your ticket has been created: {ticket_channel.mention}", ephemeral=True)
+
+
+# View class to hold the dropdown (persistent view)
+class TicketView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)  # Set timeout to None to disable it
+        self.add_item(TicketTypeDropdown())
 
 # View class to hold the dropdown
 class TicketView(discord.ui.View):
