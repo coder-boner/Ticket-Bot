@@ -30,7 +30,6 @@ CHAT_LOGS_PATH = "chat_logs/"  # Directory to store chat logs
 DEL_CATEGORY_ID = CATEGORY_ID  # ID of the category
 AUTHORIZED_USER_ID = USER_ID  # ID of the authorized user
 
-
 # Ensure chat logs directory exists
 os.makedirs(CHAT_LOGS_PATH, exist_ok=True)
 
