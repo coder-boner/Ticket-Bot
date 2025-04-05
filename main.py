@@ -24,7 +24,7 @@ TICKET_CATEGORY_ID = CATEGORY_ID  # Replace with the ID of the "Open Tickets" ca
 ARCHIVE_CATEGORY_ID = CATEGORY_ID  # Replace with the ID of the "Archived Tickets" category
 SUPPORT_ROLE_ID = ROLE_ID  # Replace with the support role ID
 TICKET_NUMBER_FILE = "ticket_number.json"  # File to persist ticket number
-CHAT_LOGS_PATH = "chat_logs/"  # Directory to store chat logs
+CHAT_LOGS_PATH = "bot/chat_logs/"  # Directory to store chat logs
 
 #DANGER THIS IS FOR THE MASS CHANNEL DELETE FOR CLOSED TICKETS
 DEL_CATEGORY_ID = CATEGORY_ID  # ID of the category
@@ -264,6 +264,4 @@ async def delete_category_channels(ctx):
 
     await ctx.send("All channels in the category have been deleted.", ephemeral=True)
 
-
-# Run the bot
-bot.run("TOKEN")
+bot.run('DISCORD_BOT_TOKEN')
